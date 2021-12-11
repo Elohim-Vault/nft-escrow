@@ -108,55 +108,55 @@ describe('escrow', () => {
           }
         );
     
-        // let _vault = await mintToken.getAccountInfo(vaultAccount);
+        let _vault = await mintToken.getAccountInfo(vaultAccount);
     
-        // let _escrowAccount = await program.account.escrowAccount.fetch(
-        //   escrowAccount.publicKey
-        // );
+        let _escrowAccount = await program.account.escrowAccount.fetch(
+          escrowAccount.publicKey
+        );
     
-        // assert.ok(_vault.owner.equals(vaultAuthority));
-        // assert.ok(_escrowAccount.initializerKey.equals(sellerAccount.publicKey));
+        assert.ok(_vault.owner.equals(vaultAuthority));
+        assert.ok(_escrowAccount.initializerKey.equals(sellerAccount.publicKey));
     });
   
-    // it("Exchange escrow operation", async () => {
-    //   const buyerAccount = anchor.web3.Keypair.generate();
-    //   const marketWallet = anchor.web3.Keypair.generate();
-    //   const buyerTokenAccount = await mintToken.createAccount(buyerAccount.publicKey);
-    //   // console.log("Buyer token account: ", buyerAccount.publicKey);
-    //   // console.log("ATA Buyer account: ", buyerTokenAccount);
+    it("Exchange escrow operation", async () => {
+      const buyerAccount = anchor.web3.Keypair.generate();
+      const marketWallet = anchor.web3.Keypair.generate();
+      const buyerTokenAccount = await mintToken.createAccount(buyerAccount.publicKey);
+      // console.log("Buyer token account: ", buyerAccount.publicKey);
+      // console.log("ATA Buyer account: ", buyerTokenAccount);
 
-    //   const tx = await program.rpc.exchange(new anchor.BN(5000000000), {
-    //     accounts: {
-    //       buyerAccount: buyerAccount.publicKey,
-    //       buyerNftTokenAccount: buyerTokenAccount,
-    //       sellerTokenAccount: sellerAccount, // I need to check this.
-    //       sellerNftTokenAccount: sellerNftTokenAccount,
-    //       sellerAccount: sellerAccount,
-    //       escrowAccount: escrowAccount,
-    //       marketWallet: marketWallet.publicKey,
-    //       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-    //       vaultAccount: vaultAccount,
-    //       vaultAuthority: vaultAuthority,
-    //       systemProgram: anchor.web3.SystemProgram.programId,
-    //       tokenProgram: TOKEN_PROGRAM_ID,
-    //       rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-    //     },
-    //     signers: [buyerAccount]
-    //   });
-      
-    //   console.log(tx);
-    // });
-
-    it ("Cancel escrow", async () => {
-      program.rpc.cancel({
+      const tx = await program.rpc.exchange(new anchor.BN(1), {
         accounts: {
+          buyerAccount: buyerAccount.publicKey,
+          buyerNftTokenAccount: buyerTokenAccount,
+          sellerTokenAccount: sellerAccount.publicKey, // I need to check this.
+          sellerNftTokenAccount: sellerNftTokenAccount,
           sellerAccount: sellerAccount.publicKey,
+          escrowAccount: escrowAccount.publicKey,
+          marketWallet: marketWallet.publicKey,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           vaultAccount: vaultAccount,
           vaultAuthority: vaultAuthority,
+          systemProgram: anchor.web3.SystemProgram.programId,
           tokenProgram: TOKEN_PROGRAM_ID,
-          escrowAccount: escrowAccount,
+          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
         },
-        signers: [sellerAccount.publicKey]
+        signers: [buyerAccount]
       });
+      
+      console.log(tx);
     });
+
+    // it ("Cancel escrow", async () => {
+    //   program.rpc.cancel({
+    //     accounts: {
+    //       sellerAccount: sellerAccount.publicKey,
+    //       vaultAccount: vaultAccount,
+    //       vaultAuthority: vaultAuthority,
+    //       tokenProgram: TOKEN_PROGRAM_ID,
+    //       escrowAccount: escrowAccount.publicKey,
+    //     },
+    //     signers: [sellerAccount]
+    //   });
+    // });
   });
