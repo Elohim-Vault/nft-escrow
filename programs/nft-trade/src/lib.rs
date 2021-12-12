@@ -1,6 +1,6 @@
 
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, CloseAccount, Mint, SetAuthority, MintTo, TokenAccount, Transfer};
+use anchor_spl::token::{self, CloseAccount, Mint, SetAuthority, TokenAccount, Transfer};
 use spl_token::instruction::AuthorityType;
 use anchor_lang::solana_program::{program::invoke, system_instruction};
 
@@ -22,6 +22,7 @@ mod nft_trade {
             return Err(ProgramError::MissingRequiredSignature);
         }
 
+        msg!("Log msg");
         ctx.accounts.escrow_account.is_initialized = true;
         ctx.accounts.escrow_account.initializer_key = ctx.accounts.seller_account.key();
         ctx.accounts.escrow_account.seller_nft_token_account = *ctx.accounts.nft_vault_account.to_account_info().key;
@@ -213,7 +214,7 @@ pub struct Exchange<'info> {
     #[account(
         mut,
         constraint = escrow_account.seller_amount == 1,
-        constraint = escrow_account.seller_nft_token_account == *seller_nft_token_account.to_account_info().key,
+        constraint = escrow_account.seller_nft_token_account == *seller_nft_token_account.to_account_info().key, // ?!
         constraint = escrow_account.initializer_key == *seller_account.key,
         close = seller_account
     )]
@@ -229,6 +230,8 @@ pub struct Exchange<'info> {
     pub rent: AccountInfo<'info>,
 }
 
+
+
 #[derive(Accounts)]
 pub struct Cancel<'info> {
     #[account(mut, signer)]
@@ -241,7 +244,7 @@ pub struct Cancel<'info> {
         mut,
         constraint = escrow_account.initializer_key == *seller_account.key,
         close = seller_account
-    )]
+    )]  
     pub escrow_account: Box<Account<'info, EscrowAccount>>,
     pub token_program: AccountInfo<'info>,
 }
@@ -361,3 +364,4 @@ pub struct EscrowAccount {
     // price of nft
     pub price: u64
 }
+

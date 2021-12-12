@@ -20,6 +20,8 @@ describe('escrow', () => {
     var vaultAccount;
     var vaultAuthority;
     var sellerTokenAccount;
+    var price;
+    var fee;
 
     it("Initialize Escrow account", async () => {
         const mintAuthority = anchor.web3.Keypair.generate();
@@ -83,8 +85,8 @@ describe('escrow', () => {
         );
         vaultAuthority = vault_authority_pda;
 
-        let price = 5000000000; // 5 SOL
-        let fee = 30; // 3%
+        price = 5000000000; // 5 SOL
+        fee = 30; // 3%
         
         await program.rpc.initialize(
           vault_account_bump,
@@ -122,15 +124,30 @@ describe('escrow', () => {
       const buyerAccount = anchor.web3.Keypair.generate();
       const marketWallet = anchor.web3.Keypair.generate();
       const buyerTokenAccount = await mintToken.createAccount(buyerAccount.publicKey);
-      // console.log("Buyer token account: ", buyerAccount.publicKey);
-      // console.log("ATA Buyer account: ", buyerTokenAccount);
 
-      const tx = await program.rpc.exchange(new anchor.BN(1), {
+      await provider.send(
+        (() => {
+          const tx = new Transaction();
+          tx.add(
+            SystemProgram.transfer({
+              fromPubkey: payer.publicKey,
+              toPubkey: buyerAccount.publicKey,
+              lamports: price,
+            }),
+          );
+          return tx;
+        })(),
+        [payer]
+      );
+    
+      const teste = await provider.connection.getBalance(buyerAccount.publicKey)
+      console.log("Buyer: " , teste);
+      const tx = await program.rpc.exchange(new anchor.BN(price), {
         accounts: {
           buyerAccount: buyerAccount.publicKey,
           buyerNftTokenAccount: buyerTokenAccount,
-          sellerTokenAccount: sellerAccount.publicKey, // I need to check this.
-          sellerNftTokenAccount: sellerNftTokenAccount,
+          sellerTokenAccount: sellerNftTokenAccount, // I need to check this.
+          sellerNftTokenAccount: vaultAccount,
           sellerAccount: sellerAccount.publicKey,
           escrowAccount: escrowAccount.publicKey,
           marketWallet: marketWallet.publicKey,
